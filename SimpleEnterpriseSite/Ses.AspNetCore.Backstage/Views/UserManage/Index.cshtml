@@ -1,0 +1,673 @@
+﻿@{
+    ViewBag.Title = "UserManage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .menuContent {
+        display: none;
+        position: absolute;
+        z-index: 3;
+        left: 0px !important;
+        top: 0px !important;
+    }
+</style>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-3" style="border-right:2px solid gray">
+            <ul id="orgnization" class="ztree"></ul>
+        </div>
+        <div class="col-sm-9 animated fadeInRight">
+            <div class="panel-body" style="padding-bottom:0px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">查询条件</div>
+                    <div class="panel-body">
+                        <div class="form-group" style="margin-top:15px">
+                            <div class="col-sm-2">
+                                <input id="txt_keyword" type="text" class="form-control" placeholder="用户名" style="width: 180px;">
+                            </div>
+                            <div class="col-sm-2">
+                                <input id="txt_nameword" type="text" class="form-control" placeholder="姓名" style="width: 180px;">
+                            </div>
+                            <div class="col-sm-4" style="text-align:left;">
+                                <button type="button" style="margin-left:10px" id="btn_query" class="btn btn-primary">查询</button>
+                                <button type="button" style="margin-left:10px" id="btn_all" class="btn btn-primary">全部</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="toolbar" class="btn-group">
+                    <button id="btn_add" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["AddBtnPms"]">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                    </button>
+                    <button id="btn_edit" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["EditBtnPms"]">
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+                    </button>
+                    <button id="btn_delete" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DeleteBtnPms"]">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                    </button>
+                </div>
+                <table id="tb_Roles"></table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--model-->
+<div id="RoleModel" class="form-horizontal" style="display:none">
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">用户名</label>
+        <div class="col-sm-4">
+            <input v-model="userId" id="UserId" class="form-control" placeholder="请输入用户id" required="required" />
+        </div>
+
+        <label class="col-sm-2 control-label">实际名称</label>
+        <div class="col-sm-4">
+            <input v-model="realName" id="RealName" class="form-control" placeholder="请输入用户名称" required="required" />
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">生日</label>
+        <div class="col-sm-4">
+            <div class="input-append date form_datetime" data-date="2018-01-01">
+                <input id="Birthday" name="Birthday" type="text" class="form-control" readonly="readonly" />
+                <span class="add-on"><i class="icon-remove"></i></span>
+                <span class="add-on"><i class="icon-calendar"></i></span>
+            </div>
+        </div>
+
+        <label class="col-sm-2 control-label">电话</label>
+        <div class="col-sm-4">
+            <input v-model="mobilePhone" class="form-control" placeholder="请输入用户手机号" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">邮箱</label>
+        <div class="col-sm-4">
+            <input v-model="email" class="form-control" placeholder="请输入用户邮箱" />
+        </div>
+
+        <label class="col-sm-2 control-label">微信</label>
+        <div class="col-sm-4">
+            <input v-model="wechat" class="form-control" placeholder="请输入用户微信" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">部门</label>
+        <div class="col-sm-4">
+            @*<select v-model="departmentId" style="width:240px;height:30px;">
+                    <option v-for="option in deptoptions" v-bind:value="option.value">
+                        {{option.text}}
+                    </option>
+                </select>*@
+            <input id="citySel" type="text" data-id="" readonly value="" style="width:240px;" />
+            &nbsp;<a id="menuBtn" href="#" onclick="showMenu(); return false;">选择</a>
+            &nbsp;<a href="#" id="empty">清空</a>
+
+            <div id="menuContent" class="menuContent" style="display:none; position: relative; z-index:3;left :0px!important;top:0px!important">
+                <ul id="treeDemo" class="ztree" style="margin-top:0; width:160px;"></ul>
+            </div>
+        </div>
+
+        @*<label class="col-sm-2 control-label">角色</label>
+            <div class="col-sm-4">
+                <select v-model="roleId" style="width:240px;height:30px;">
+                    <option v-for="option in roleoptions" v-bind:value="option.value">
+                        {{option.text}}
+                    </option>
+                </select>
+            </div>*@
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">状态</label>
+        <div class="col-sm-4">
+            <select v-model="state" style="width:240px;height:30px;">
+                <option v-for="option in stateoptions" v-bind:value="option.value">
+                    {{option.text}}
+                </option>
+            </select>
+        </div>
+        <label class="col-sm-2 control-label">性别</label>
+        <div class="col-sm-4">
+            <select v-model="gender" style="width:240px;height:30px;">
+                <option v-for="option in genderoptions" v-bind:value="option.value">
+                    {{option.text}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">备注</label>
+        <div class="col-sm-4">
+            <input v-model="description" class="form-control" placeholder="备注" />
+        </div>
+    </div>
+    <div class="errormsg">
+
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" id="Rolebutton" class="btn btn-group">确定</button>
+            <button type="button" id="CloleRole" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+<!--权限弹窗-->
+<div id="Permission" style="display:none">
+    <div class="col-sm-6">
+        <div class="col-sm-offset-3" style="margin-top:20px;">
+            <ul id="treePermission" class="ztree"></ul>
+        </div>
+        <div class="col-sm-offset-1">
+            <button type="button" id="btnpermission" class="btn btn-group">确定</button>
+            <button type="button" id="closepermission" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+<!--所有权限-->
+<div id="CheckPermission" style="display:none">
+    <div class="col-sm-6">
+        <div class="col-sm-offset-3" style="margin-top:20px;">
+            <ul id="treecPermission" class="ztree"></ul>
+        </div>
+        <div class="col-sm-offset-1">
+            <button type="button" id="btncpermission" class="btn btn-group">确定</button>
+        </div>
+    </div>
+</div>
+
+<link href="~/css/font-awesome.min.css" rel="stylesheet" />
+<link href="~/lib/zTree_v3/css/metroStyle/metroStyle.css" rel="stylesheet" />
+<script src="~/lib/zTree_v3/js/jquery.ztree.core.min.js"></script>
+<script src="~/lib/zTree_v3/js/jquery.ztree.excheck.min.js"></script>
+<script src="~/lib/index/ztree_select.js"></script>
+<script src="~/lib/index/permission.js"></script>
+<script src="~/lib/index/check_permission.js"></script>
+<script type="text/javascript">
+    $(function () {
+        //必填项
+        var required = $('input[required]');
+        required.each(function (i, n) {
+            $(n).parent().prev('label').append('<span style="color:red">*</span>');
+        });
+
+        //1.初始化Table
+        var table = new TableInit();
+        table.Init();
+
+        //2.初始化button
+        var button = new ButtonInit();
+        button.Init();
+    });
+
+
+    //组织架构
+    var settingOrg = {
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            //beforeClick: beforeClick,
+            onClick: onSelectClick
+        }
+    };
+
+    var detpSearchId = '';
+    //组织树点击事件
+    function onSelectClick(e, treeId, treeNode) {
+        var zTree = $.fn.zTree.getZTreeObj("orgnization"),
+            nodes = zTree.getSelectedNodes(),
+            v = "";
+        if (nodes != null)
+            v = nodes[0].id;
+        detpSearchId = v;
+        $("#tb_Roles").bootstrapTable('refresh');
+    }
+
+
+    var roleData = [];
+    //model
+    var model = {
+        operate: '',
+
+        userId: '',
+        realName: '',
+        birthday: '',
+        email: '',
+        wechat: '',
+        mobilePhone: '',
+        state: 1,
+        gender: 1,
+        description: '',
+        departmentId: '',
+        //roleId: '',
+    }
+
+    //vue
+    var vm = new Vue({
+        el: '#RoleModel',
+        data: {
+            Id: model.Id,
+            realName: model.realName,
+            userId: model.userId,
+            birthday: model.birthday,
+            mobilePhone: model.mobilePhone,
+            email: model.email,
+            wechat: model.wechat,
+            description: model.description,
+            departmentId: model.departmentId,
+            //deptoptions: [
+            //    { text: '技术部', value: '1' },
+            //    { text: '策划部', value: '2' },
+            //    { text: '运营部', value: '3' },
+            //],
+
+            //此种角色绑定方法启用
+            //roleId: model.roleId,
+            //roleoptions: [],
+
+            state: model.state,
+            stateoptions: [
+                { text: '启用', value: '1' },
+                { text: '禁用', value: '0' },
+                { text: '锁住', value: '2' }
+            ],
+
+            gender: model.gender,
+            genderoptions: [
+                { text: '男', value: '1' },
+                { text: '女', value: '2' },
+            ],
+
+            //表单上没有的字段
+            createUserId: '',
+            creationTime: ''
+
+        },
+        //methods: {
+        //    getroleoptions: function () {
+        //        var _this = this;
+        //        var aaa = getRoles();
+        //        _this.roleoptions = aaa;
+        //    }
+        //}
+    });
+    //vm.getroleoptions();
+
+    //获取角色列表
+    function getRoles() {
+        //$ses.get('/Role/GetRoleItems', null, function (result) {
+        //    return result;
+        //});
+        var data = [];
+        $.ajax({
+            async: false,
+            type: 'get',
+            dataType: 'json',
+            url: '/Role/GetRoleItems',
+            data: {
+            },
+            success: function (result) {
+                data = result;
+                data.splice(0, 0, { id: '', pId: '', name: '' });
+            },
+            error: function (err) {
+                $ses.msg(err.statusText);
+            }
+        });
+        return data;
+    }
+    //初始化时间控件
+    function initdatetimepicker() {
+        var date = new Date();
+        $(".form_datetime").datetimepicker({
+            language: "zh-CN",
+            format: "yyyy-mm-dd",
+            autoclose: true,     //选中后关闭
+            todayBtn: true,
+            initialDate: date,
+            forceParse: 1,
+            minView: "month" //设置空间只选择到月份
+        });
+    }
+
+    //清空部门
+    $("#empty").click(function () {
+        $("#citySel").attr('value', '');
+    })
+
+    // 验证
+    function validate() {
+        var userid = trim(vm.userId);
+        if (userid == '' || typeof (userid) == 'undefined') {
+            var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写用户id</label>';
+            $(".errormsg").html(html);
+            return false;
+        }
+        var username = trim(vm.realName);
+        if (username == '' || typeof (username) == 'undefined') {
+            var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写用户名</label>';
+            $(".errormsg").html(html);
+            return false;
+        }
+        return true;
+    }
+
+
+    var TableInit = function () {
+        var objTabelInit = new Object();
+
+        objTabelInit.Init = function () {
+            $("#tb_Roles").bootstrapTable({
+                url: '/UserManage/PageIndex',         //请求后台的URL（*）
+                dataType: "json",
+                method: 'get',                      //请求方式（*）
+                toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: false,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParamsType: "",
+                queryParams: objTabelInit.queryParams,//传递参数（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize: 10,                       //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: false,                //是否启用点击选中行
+                height: 650,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                   //是否显示父子表
+
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'Id',
+                    title: 'Id',
+                    visible: false
+                }, {
+                    field: 'UserId',
+                    title: '用户名'
+                }, {
+                    field: 'RealName',
+                    title: '姓名'
+                }, {
+                    field: 'Gender',
+                    title: '性别'
+                }, {
+                    field: 'DepartmentName',
+                    title: '部门'
+                }, {
+                    field: 'RoleName',
+                    title: '角色'
+                }, {
+                    field: 'State',
+                    title: '状态',
+                    // value: 该cell原来的值，row：该行数据 ，index：该行的序列号，从0开始
+                    formatter(value, row, index) {
+                        return getState(value);
+                    }
+                }, {
+                    field: 'CreationTime',
+                    title: '创建时间',
+                }, {
+                    field: 'Description',
+                    title: '备注'
+                }, {
+                    field: 'Button',
+                    title: '操作',
+                    events: operateEvent,
+                    formatter: editAndPermission,
+                }]
+            });
+        };
+
+        //获得查询参数
+        objTabelInit.queryParams = function (params) {
+            var temp = {
+                //这里的键的名字和控制器的变量名必须一致
+                pagesize: params.pageSize,
+                pageindex: params.pageNumber - 1,
+                userId: $("#txt_keyword").val(),
+                realName: $("#txt_nameword").val(),
+                deptId: detpSearchId
+            };
+            return temp;
+        };
+
+        //权限format
+        function editAndPermission(value, row, index) {
+            if ((row.State == "Normal" || row.State=="1") && '@ViewBag.BtnPermissionDic["EditBtnPms"]' == '') {
+                return ["<button id='TablePermission' type='button' class='btn btn-default'>权限</button>",
+                    "<button id='AllPermission' type='button' class='btn btn-default'>所有权限</button>"].join("");
+            }
+            return;
+        }
+
+        //权限事件
+       window.operateEvent = {
+           "click #TablePermission": function (e, value, row, index) {
+               // 权限弹窗事件，弹窗之前先获取相应权限数据
+               initpermissiontree(row.Id, 'user');
+               openLayer();
+           },
+
+           "click #AllPermission": function (e, value, row, index) {
+               //查看该人员所有权限事件，弹窗之前先获取相应权限数据
+               cinitpermissiontree(row.Id, 'user');
+               copenLayer();
+           }
+       }
+
+        return objTabelInit;
+    }
+
+
+    var ButtonInit = function () {
+        var oInit = new Object();
+        // model
+
+        oInit.Init = function () {
+
+            var index = 0;
+            //搜索
+            $("#btn_query").click(function () {
+                $("#tb_Roles").bootstrapTable('refresh');
+            });
+            //显示所有
+            $("#btn_all").click(function () {
+                detpSearchId = '';
+                $("#tb_Roles").bootstrapTable('refresh');
+            });
+            //新增
+            $("#btn_add").click(function () {
+                $("#UserId").removeAttr('readOnly');
+                $("#RealName").removeAttr('readOnly');
+                //弹窗
+                operate.initvm();
+                index = addoredit('add');
+            });
+
+            //编辑
+            $("#btn_edit").click(function () {
+                var row = $("#tb_Roles").bootstrapTable('getSelections');
+                if (row.length != 1) {
+                    layer.msg('请选中一项进行编辑');
+                    return;
+                }
+                $("#UserId").attr('readOnly', 'false');
+                $("#RealName").attr('readOnly', 'false');
+                var userId = row[0].Id;
+                operate.getUser(userId);
+                index = addoredit('edit');
+            });
+
+            //删除
+            $("#btn_delete").click(function () {
+                var row = $("#tb_Roles").bootstrapTable('getSelections');
+                if (row.length <= 0) {
+                    layer.msg('还未选中任何项');
+                    return;
+                }
+                layer.confirm('确定删除么？', {
+                    btn: ['确定', '取消']
+                }, function () {
+                    var ids = [];
+                    for (var i = 0; i < row.length; i++) {
+                        ids[i] = row[i].Id;
+                    }
+                    operate.delete(ids);
+                }, function () {
+                    return;
+                });
+            });
+            //保存
+            $("#Rolebutton").click(function () {
+                vm.birthday = $("#Birthday").val();
+                vm.departmentId = $("#citySel").attr("data-id");
+                if (model.operate == 'add') {
+                    operate.add(index);
+                }
+                if (model.operate == 'edit') {
+                    operate.edit(index);
+                }
+            });
+            //取消 事件
+            $("#CloleRole").click(function () {
+                layer.close(index);
+            })
+
+            //弹窗事件
+            function addoredit(flag) {
+                var index = layer.open({
+                    type: 1,
+                    title: '用户',
+                    skin: 'layui-layer-rim', //样式类名
+                    area: ['800px', '600px'], //宽高
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: $("#RoleModel"),
+                });
+                initdatetimepicker();
+                model.operate = flag;
+                return index;
+            };
+        };
+
+        return oInit;
+    };
+
+    //调用操作
+    var operate = {
+
+        add: function (index) {
+            if (!validate())
+                return;
+            $ses.post("/UserManage/AddUser", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        edit: function (index) {
+            if (!validate()) {
+                return;
+            }
+            $ses.post("/UserManage/UpdateUser", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        delete: function (ids) {
+            var data = {
+                ids: ids
+            }
+            $ses.post("/UserManage/DeleteByIds", data, function (result) {
+                $ses.msg(result.Message);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        getUser: function (userId) {
+            var data = {
+                userId: userId
+            };
+            $ses.get('/UserManage/GetUserById', data, function (result) {
+                vm.Id = result.user.Id;
+                vm.userId = result.user.UserId;
+                vm.realName = result.user.RealName;
+                //vm.birthday = result.user.Birthday;
+                $("#Birthday").val(result.user.Birthday);
+                vm.mobilePhone = result.user.MobilePhone;
+                vm.email = result.user.Email;
+                vm.wechat = result.user.WeChat;
+                //vm.departmentId = result.user.DepartmentId;
+                $("#citySel").attr("data-id", result.user.departmentId);
+                $("#citySel").attr("value", result.departmentName);
+                //vm.roleId = result.user.RoleId;
+                vm.state = result.user.State;
+                vm.gender = result.user.Gender;
+                vm.description = result.user.Description;
+                vm.createUserId = result.user.userId;
+                vm.creationTime = result.user.creationTime;
+            });
+        },
+
+        initvm: function () {
+            vm.Id = '';
+            vm.userId = '';
+            vm.realName = '';
+            vm.mobilePhone = '';
+            vm.email = '';
+            vm.wechat = '';
+            $("#citySel").attr("data-id", '');
+            $("#citySel").attr("value", '');
+            //vm.roleId = '';
+            vm.state = '1';
+            vm.gender = '';
+            vm.description = '';
+            vm.createUserId = '';
+            vm.creationTime = '';
+        }
+    }
+
+
+    //刷新页面
+    function refresh() {
+        window.location.reload();
+    }
+
+    function getState(state) {
+        if (state == "Delete" || state==0) {
+            return "已禁用";
+        } else if (state == "Normal" || state==1) {
+            return "正常";
+        } else {
+            return "已锁住";
+        }
+    }
+</script>

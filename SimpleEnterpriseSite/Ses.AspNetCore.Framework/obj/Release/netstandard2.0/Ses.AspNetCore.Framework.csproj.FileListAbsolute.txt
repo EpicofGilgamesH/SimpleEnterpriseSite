@@ -1,0 +1,13 @@
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.Framework.deps.json
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.Framework.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.Framework.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.Entities.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.ViewModels.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.Entities.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\bin\Release\netstandard2.0\Ses.AspNetCore.ViewModels.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.csprojResolveAssemblyReference.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.csproj.CoreCompileInputs.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.AssemblyInfoInputs.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.AssemblyInfo.cs
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Framework\obj\Release\netstandard2.0\Ses.AspNetCore.Framework.pdb

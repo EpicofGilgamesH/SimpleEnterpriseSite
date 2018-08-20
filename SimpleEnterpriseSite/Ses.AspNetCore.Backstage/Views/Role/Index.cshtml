@@ -1,0 +1,735 @@
+﻿@{
+    ViewBag.Title = "Role";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #optionid {
+        top: 86px !important;
+    }
+</style>
+<div class="col-sm-12 animated fadeInRight">
+    <div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default">
+            <div class="panel-heading">查询条件</div>
+            <div class="panel-body">
+                <div class="form-group" style="margin-top:15px">
+                    <div class="col-sm-2">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="角色名" style="width: 180px;">
+                    </div>
+                    <div class="col-sm-2">
+                        <input id="txt_nameword" type="text" class="form-control" placeholder="用户Id" style="width: 180px;">
+                    </div>
+                    <div class="col-sm-4" style="text-align:left;">
+                        <button type="button" style="margin-left:10px" id="btn_query" class="btn btn-primary">查询</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toolbar" class="btn-group">
+            <button id="btn_add" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["AddBtnPms"]">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+            </button>
+            <button id="btn_edit" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["EditBtnPms"]">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+            </button>
+            <button id="btn_delete" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DeleteBtnPms"]">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+            </button>
+        </div>
+        <table id="tb_Roles"></table>
+
+    </div>
+</div>
+
+
+<!--model-->
+<div id="RoleModel" class="form-horizontal" style="display:none">
+
+    <div class="form-group" style="margin-top:10px">
+        <label class="col-sm-2 control-label">角色名</label>
+        <div class="col-sm-4">
+            <input v-model="roleId" id="RoleId" class="form-control" placeholder="请输入角色名称" required="required" />
+        </div>
+
+        <label class="col-sm-2 control-label">角色信息</label>
+        <div class="col-sm-4">
+            <input v-model="roleInfo" id="RoleInfo" class="form-control" placeholder="请输入角色信息" required="required" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">角色信息</label>
+        <div class="col-sm-4">
+            <select v-model="roleState" style="width:240px;height:30px;">
+                <option v-for="option in stateoptions" v-bind:value="option.value">
+                    {{option.text}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">角色用户</label>
+        <div class="col-sm-4">
+            @*<textarea v-model="roleUsers" name="UserName" id="province" class="cba" onkeyup="searchDev(this.value)" required="required" rows="4" cols="60" errormessage="不能为空！"></textarea>*@
+            <div style="margin-bottom:3px;">
+                <i class="fa fa-plus" id="iuserSearch" style="margin-right:10px;"></i>
+                <i class="fa fa-minus" id="iuserDelete"></i>
+            </div>
+            <textarea v-model="roleUsers" id="roleUsers" required="required" rows="4" cols="60" readonly="readonly"></textarea>
+        </div>
+    </div>
+
+
+    <div class="errormsg">
+
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" id="Rolebutton" class="btn btn-group">确定</button>
+            <button type="button" id="CloleRole" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+<!--权限弹窗-->
+<div id="Permission" style="display:none">
+    <div class="col-sm-6">
+        <div class="col-sm-offset-3" style="margin-top:20px;">
+            <ul id="treePermission" class="ztree"></ul>
+        </div>
+        <div class="col-sm-offset-1">
+            <button type="button" id="btnpermission" class="btn btn-group">确定</button>
+            <button type="button" id="closepermission" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+
+<!--用户搜索弹窗-->
+<div id="userSearch" style="display:none">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">查询条件</div>
+        <div class="panel-body">
+            <div class="form-group" style="margin-top:15px">
+                <div class="col-sm-2">
+                    <input id="searchUserName" type="text" class="form-control" placeholder="用户名" style="width: 100px;">
+                </div>
+                <div class="col-sm-2">
+                    <input id="searchUserId" type="text" class="form-control" placeholder="用户Id" style="width: 100px;">
+                </div>
+                <div class="col-sm-4" style="text-align:left;">
+                    <button type="button" style="margin-left:10px" id="search_query" class="btn btn-primary">查询</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table id="tb_Search"></table>
+    <div class="col-lg-offset-5">
+        <button type="button" id="btnisearch" class="btn btn-group">确定</button>
+        <button type="button" id="closeisearch" class="btn btn-group">取消</button>
+    </div>
+</div>
+
+<!--用户删除弹窗-->
+<div id="userDelete" style="display:none">
+    <div class="col-lg-offset-1" style="margin-top:20px;height:500px;" id="userDeleteTable"></div>
+    <div class="col-lg-offset-5">
+        <button type="button" id="btnidelete" class="btn btn-group">确定</button>
+        <button type="button" id="closedelete" class="btn btn-group">取消</button>
+    </div>
+</div>
+
+<link href="~/css/font-awesome.min.css" rel="stylesheet" />
+<link href="~/lib/zTree_v3/css/metroStyle/metroStyle.css" rel="stylesheet" />
+<script src="~/lib/zTree_v3/js/jquery.ztree.core.min.js"></script>
+<script src="~/lib/zTree_v3/js/jquery.ztree.excheck.min.js"></script>
+@*<script src="~/lib/index/searchDropDownSelect.js"></script>*@
+<script src="~/lib/index/permission.js"></script>
+<script src="~/lib/index/search_user.js"></script>
+
+<script type="text/javascript">
+        $(function () {
+            //必填项
+            var required = $('input[required]');
+            required.each(function (i, n) {
+                $(n).parent().prev('label').append('<span style="color:red">*</span>');
+            });
+            $("#roleUsers").parent().prev('label').append('<span style="color:red">*</span>');
+            //1.初始化Table
+            var table = new TableInit();
+            table.Init();
+
+            //2.初始化button
+            var button = new ButtonInit();
+            button.Init();
+
+
+        });
+
+        //vm
+        var vm = new Vue({
+            el: '#RoleModel',
+            data: {
+                roleId: '',
+                roleInfo: '',
+                roleUsers: '',
+                roleState: 1,
+                stateoptions: [
+                    { text: '启用', value: '1' },
+                    { text: '禁用', value: '0' },
+                    { text: '锁住', value: '2' }
+                ]
+            }
+        });
+
+        // 验证
+        function validate() {
+            var roleid = trim(vm.roleId);
+            if (roleid == '' || typeof (roleid) == 'undefined') {
+                var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写角色名</label>';
+                $(".errormsg").html(html);
+                return false;
+            }
+            var roleinfo = trim(vm.roleInfo);
+            if (roleinfo == '' || typeof (roleinfo) == 'undefined') {
+                var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写角色信息</label>';
+                $(".errormsg").html(html);
+                return false;
+            }
+            var roleusers = trim(vm.roleUsers);
+            if (roleusers == '' || typeof (roleusers) == 'undefined') {
+                var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请添加用户</label>';
+                $(".errormsg").html(html);
+                return false;
+            }
+            return true;
+        }
+
+        // bootstrap table
+            var TableInit = function () {
+            var objTabelInit = new Object();
+
+            objTabelInit.Init = function () {
+                $("#tb_Roles").bootstrapTable({
+                    url: '/Role/PageIndex',         //请求后台的URL（*）
+                    dataType: "json",
+                    method: 'get',                      //请求方式（*）
+                    toolbar: '#toolbar',                //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    sortable: false,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    queryParamsType: "",
+                    queryParams: objTabelInit.queryParams,//传递参数（*）
+                    sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                    pageNumber: 1,                       //初始化加载第一页，默认第一页
+                    pageSize: 10,                       //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: false,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: false,                //是否启用点击选中行
+                    height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                   //是否显示父子表
+
+                    columns: [{
+                        checkbox: true
+                    }, {
+                        field: 'SysRole.Id',
+                        title: 'Id',
+                        visible: false
+                    }, {
+                        field: 'SysRole.Name',
+                        title: '角色名',
+                        width: 100
+                    }, {
+                        field: 'SysRole.NormalizedName',
+                        title: '角色信息',
+                        width: 100
+                    }, {
+                        field: 'Users',
+                        title: '角色用户',
+                        width: 500
+                    }, {
+                        field: 'SysRole.State',
+                        title: '状态',
+                        width: 100,
+                        // value: 该cell原来的值，row：该行数据 ，index：该行的序列号，从0开始
+                        formatter(value, row, index) {
+                            return getState(value);
+                        }
+                    },{
+                        field: 'Button',
+                        title: '操作',
+                        width: 100,
+                        events: operateEvent,
+                        formatter: editAndPermission,
+                    }]
+                });
+            };
+
+            //获得查询参数
+            objTabelInit.queryParams = function (params) {
+                var temp = {
+                    //这里的键的名字和控制器的变量名必须一致
+                    pagesize: params.pageSize,
+                    pageindex: params.pageNumber - 1,
+                    roleName: $("#txt_keyword").val(),
+                    userId: $("#txt_nameword").val(),
+                };
+                return temp;
+            };
+
+            //权限format
+           function editAndPermission(value, row, index) {
+               if (row.SysRole.State == "1"&&'@ViewBag.BtnPermissionDic["EditBtnPms"]'=='') {
+                    return "<button id='TablePermission' type='button' class='btn btn-default'>权限</button>";
+                }
+                return;
+            }
+
+            //权限事件
+           window.operateEvent = {
+               "click #TablePermission": function (e, value, row, index) {
+                   // 权限弹窗事件，弹窗之前先获取相应权限数据
+                   initpermissiontree(row.SysRole.Id,'role');
+                   openLayer();
+               }
+           }
+
+            return objTabelInit;
+        }
+
+        //按钮操作
+            var ButtonInit = function () {
+                var oInit = new Object();
+                // model
+
+                oInit.Init = function () {
+
+                    var index = 0;
+                    //搜索
+                    $("#btn_query").click(function () {
+                        $("#tb_Roles").bootstrapTable('refresh');
+                    });
+                    //显示所有
+                    $("#btn_all").click(function () {
+                        detpSearchId = '';
+                        $("#tb_Roles").bootstrapTable('refresh');
+                    });
+                    //新增
+                    $("#btn_add").click(function () {
+                        $("#RoleId").removeAttr('readOnly');
+                        //弹窗
+                        operate.initvm();
+                        index = addoredit('add');
+                    });
+
+                    //编辑
+                    $("#btn_edit").click(function () {
+                        var row = $("#tb_Roles").bootstrapTable('getSelections');
+                        if (row.length != 1) {
+                            layer.msg('请选中一项进行编辑');
+                            return;
+                        }
+                        $("#RoleId").attr('readOnly', 'false');
+                        var roleId = row[0].SysRole.Id;
+                        initUserData(roleId); //获取角色成员
+                        operate.getUser(roleId);//获取角色信息
+                        index = addoredit('edit');
+                    });
+
+                    //删除
+                    $("#btn_delete").click(function () {
+                        var row = $("#tb_Roles").bootstrapTable('getSelections');
+                        if (row.length <= 0) {
+                            layer.msg('还未选中任何项');
+                            return;
+                        }
+                        layer.confirm('确定删除么？', {
+                            btn: ['确定', '取消']
+                        }, function () {
+                            var ids = [];
+                            for (var i = 0; i < row.length; i++) {
+                                ids[i] = row[i].SysRole.Id;
+                            }
+                            operate.delete(ids);
+                        }, function () {
+                            return;
+                        });
+                    });
+                    //保存
+                    $("#Rolebutton").click(function () {
+                        if (layeroperate == 'add') {
+                            operate.add(index);
+                        }
+                        if (layeroperate == 'edit') {
+                            operate.edit(index);
+                        }
+                    });
+                    //取消 事件
+                    $("#CloleRole").click(function () {
+                        layer.close(index);
+                    })
+
+                    var layeroperate = '';
+                    //弹窗事件
+                    function addoredit(flag) {
+                        var index = layer.open({
+                            type: 1,
+                            title: '用户',
+                            skin: 'layui-layer-rim', //样式类名
+                            area: ['800px', '600px'], //宽高
+                            closeBtn: 0, //不显示关闭按钮
+                            anim: 2,
+                            shadeClose: true, //开启遮罩关闭
+                            content: $("#RoleModel"),
+                        });
+                        layeroperate = flag;
+                        return index;
+                    };
+                };
+
+                return oInit;
+            };
+
+
+
+        //函数集合
+            var operate = {
+
+                add: function (index) {
+                    if (!validate())
+                        return;
+                    $ses.post("/Role/AddRole", vm._data, function (result) {
+                        $ses.msg(result.Message);
+                        layer.close(index);
+                        setTimeout(refresh, 1000);//刷新页面
+                    });
+                },
+
+                edit: function (index) {
+                    if (!validate()) {
+                        return;
+                    }
+
+                    //js验证两个集合数据一致的方法需要重新制定 （Id,UserId,RealName这三个字段一致即可）
+                    if (compareUser()&& vm.roleId == roleName && vm.roleInfo == roleInfo
+                        && vm.roleState == rolestate) {
+                        layer.close(index);
+                        return;
+                    }
+                    $ses.post("/Role/UpdateRole", vm._data, function (result) {
+                        $ses.msg(result.Message);
+                        layer.close(index);
+                        setTimeout(refresh, 1000);//刷新页面
+                    });
+                },
+
+                delete: function (ids) {
+                    var data = {
+                        ids: ids
+                    }
+                    $ses.post("/Role/DeleteByIds", data, function (result) {
+                        $ses.msg(result.Message);
+                        setTimeout(refresh, 1000);//刷新页面
+                    });
+                },
+
+                getUser: function (roleid) {
+                    //var data = {
+                    //    roleId: roleid
+                    //};
+                    //$ses.get('/Role/GetRoleById', data, function (result) {
+                    //    vm.roleId = result.Name;
+                    //    vm.roleInfo = result.NormalizedName;
+                    //    //vm.roleUsers = result.Roleuser;
+                    //});
+                    $.ajax({
+                        async: false,
+                        type: 'get',
+                        dataType: 'json',
+                        url: '/Role/GetRoleById',
+                        data: {
+                            roleId: roleid
+                        },
+                        success: function (result) {
+                            getStuts(result);
+                            vm.roleId = result.Name;
+                            roleName = result.Name;
+                            vm.roleInfo = result.NormalizedName;
+                            roleInfo = result.NormalizedName;
+                            vm.roleState = result.State;
+                            rolestate = result.State;
+                            vm.roleUsers = initUserTextArea();
+                        },
+                        error: function (err) {
+                            $ses.msg(err.statusText);
+                        }
+                    });
+                },
+
+                initvm: function () {
+                    vm.roleId = '';
+                    vm.roleInfo = '';
+                    vm.roleUsers = '';
+                }
+            }
+
+            function getStuts(result) {
+                var isStandardResult = ("Status" in result) && ("Msg" in result);
+                if (isStandardResult) {
+                    if (result.Status == ResultStatus.Failed) {
+                        layerAlert(result.Msg || "操作失败");
+                        return;
+                    }
+                    if (result.Status == ResultStatus.NotLogin) {
+                        layerAlert(result.Msg || "未登录或登录过期，请重新登录");
+                        return;
+                    }
+                    if (result.Status == ResultStatus.Unauthorized) {
+                        layerAlert(result.Msg || "权限不足，禁止访问");
+                        return;
+                    }
+                }
+            }
+
+
+            function getState(state) {
+                if (state == "0") {
+                    return "已禁用";
+                } else if (state == "1") {
+                    return "正常";
+                } else {
+                    return "已锁住";
+                }
+            }
+
+            //刷新页面
+            function refresh() {
+                window.location.reload();
+            }
+
+            //用户搜索
+            $("#iuserSearch").click(function () {
+                searchInit();
+                searchLayer();
+            });
+
+            //用户删除
+            $("#iuserDelete").click(function () {
+                createUserTable();
+                deleteLayer();
+            });
+
+            //用户搜索弹窗
+            var searchLayerIndex ='';
+            var searchLayer = function () {
+                searchLayerIndex = layer.open({
+                    type: 1,
+                    title: '用户查询',
+                    skin: 'layui-layer-rim', //样式类名
+                    area: ['1000px', '800px'], //宽高
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: $("#userSearch"),
+                });
+            }
+
+            //用户删除弹窗
+            var deleteLayerIndex = '';
+            var deleteLayer = function() {
+                deleteLayerIndex = layer.open({
+                    type: 1,
+                    title: '用户删除',
+                    skin: 'layui-layer-rim', //样式类名
+                    area: ['1000px', '800px'], //宽高
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: $("#userDelete"),
+                });
+            }
+
+
+            //搜索事件
+            $("#search_query").click(function () {
+                $("#tb_Search").bootstrapTable('refresh');
+            });
+
+            //弹窗取消事件
+            $("#closeisearch").click(function () {
+                layer.close(searchLayerIndex);
+            });
+
+            var initUserIds = new Array();
+            var primeUserIds = new Array();
+            var roleName = '';
+            var roleInfo = '';
+            var rolestate='';
+            //弹窗确定事件
+            $("#btnisearch").click(function () {
+                var row = $("#tb_Search").bootstrapTable('getSelections');
+                if (row.length <= 0) {
+                    layer.msg('还未选中任何项');
+                    return;
+                }
+
+                for (var i = 0; i < row.length; i++) {
+                    if (!isInArray(initUserIds, row[i])) {
+                        initUserIds.push(row[i]);
+                    }
+                }
+                vm.roleUsers = initUserTextArea();
+                layer.close(searchLayerIndex);
+            });
+
+            //删除弹窗取消事件
+            $("#closedelete").click(function () {
+                layer.close(deleteLayerIndex);
+            });
+
+            //删除弹窗确定事件
+            $("#btnidelete").click(function () {
+                var arr = new Array();
+                $("input[name^='boxs']:checked").each(function (index, element) {
+                    arr[index] = $(element).val();
+                });
+                if (arr.length <= 0) {
+                    layer.msg('还未选中任何项');
+                    return;
+                }
+
+                for (var i = 0; i < arr.length; i++) {
+                    var index = isIdInArray(initUserIds, arr[i]);
+                    if (index != -1) {
+                        initUserIds.splice(index, 1);
+                    }
+                }
+                vm.roleUsers = initUserTextArea();
+                layer.close(deleteLayerIndex);
+            });
+
+            function isIdInArray(arr, value) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (value === arr[i].UserId) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            function isInArray(arr, value) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (value === arr[i]) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            //初始化人员框
+            function initUserTextArea() {
+                var usertextareastr = '';
+                for (var i = 0; i < initUserIds.length; i++) {
+                    if (i == initUserIds.length - 1) {
+                        usertextareastr += initUserIds[i].UserId + '(' + initUserIds[i].RealName+')';
+                    } else {
+                        usertextareastr += initUserIds[i].UserId + '(' + initUserIds[i].RealName + ')'+",";
+                    }
+                }
+                return usertextareastr;
+            }
+
+            //获取初始化人员数据
+            function initUserData(roleid) {
+                //var data = {
+                //    roleId: roleid
+                //}
+                //$ses.get('/Role/GetRoleUserIds', data, function (data) {
+                //    usertextareastr = data;
+                //});
+                $.ajax({
+                    async: false,
+                    type: 'get',
+                    dataType: 'json',
+                    url: '/Role/GetRoleUserIds',
+                    data: {
+                        roleId: roleid
+                    },
+                    success: function (result) {
+                        getStuts(result);
+                        initUserIds = result;
+                        primeUserIds = initUserIds.slice(0);
+                    },
+                    error: function (err) {
+                        $ses.msg(err.statusText);
+                    }
+                });
+            }
+
+
+            //构建用户删除table
+            function createUserTable() {
+                var str = '';
+                str += "<table border='1' bordercolor='#F0F0F0'>";
+                str += '<tr>';
+                str += "<td width='50px;'><input id= 'allboxs' onclick= 'allcheck()' type= 'checkbox' /></td>";
+                str += "<td width='200px;'> 用户Id </td>";
+                str += "<td width='200px;'> 用户名 </td>";
+                str += '</tr>';
+                str+=''
+                for (var i = 0; i < initUserIds.length; i++) {
+                    str += '<tr>';
+                    str += "<td><input  name='boxs' type='checkbox' value='" + initUserIds[i].UserId+"'/></td>";
+                    str += "<td>" + initUserIds[i].UserId + "</td>";
+                    str += "<td>" + initUserIds[i].RealName + "</td>";
+                    str += '</tr>';
+                }
+                str += "</table>";
+                $("#userDeleteTable").html(str);
+            }
+
+
+            // table 全选事件
+            function allcheck() {
+                var nn = $("#allboxs").is(":checked"); //判断th中的checkbox是否被选中，如果被选中则nn为true，反之为false
+                if (nn == true) {
+                    var namebox = $("input[name^='boxs']");  //获取name值为boxs的所有input
+                    for (i = 0; i < namebox.length; i++) {
+                        namebox[i].checked = true;    //js操作选中checkbox
+                    }
+                }
+                if (nn == false) {
+                    var namebox = $("input[name^='boxs']");
+                    for (i = 0; i < namebox.length; i++) {
+                        namebox[i].checked = false;
+                    }
+                }
+            }
+
+            //比较角色人员数据是否一致
+            function compareUser() {
+                if (initUserIds.length != primeUserIds.length)
+                    return false;
+                for (var i = 0; i < initUserIds.length; i++) {
+                    for (var j = 0; j < primeUserIds.length; j++) {
+                        if (primeUserIds[j] != initUserIds[i])
+                            return false;
+                    }
+                }
+                return true;
+            }
+
+
+</script>

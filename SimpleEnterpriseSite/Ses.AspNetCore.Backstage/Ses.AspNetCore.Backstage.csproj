@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\lib\ztree\**" />
+    <Content Remove="wwwroot\lib\ztree\**" />
+    <EmbeddedResource Remove="wwwroot\lib\ztree\**" />
+    <None Remove="wwwroot\lib\ztree\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ses.AspNetCore.Entities\Ses.AspNetCore.Entities.csproj" />
+    <ProjectReference Include="..\Ses.AspNetCore.Framework\Ses.AspNetCore.Framework.csproj" />
+    <ProjectReference Include="..\Ses.AspNetCore.IServices\Ses.AspNetCore.IServices.csproj" />
+    <ProjectReference Include="..\Ses.AspNetCore.Service\Ses.AspNetCore.Services.csproj" />
+    <ProjectReference Include="..\Ses.AspNetCore.ViewModels\Ses.AspNetCore.ViewModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\fonts\" />
+  </ItemGroup>
+
+</Project>

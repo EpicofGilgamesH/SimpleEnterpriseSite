@@ -1,0 +1,348 @@
+﻿@{
+    ViewBag.Title = "UserManage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-sm-12 animated fadeInRight">
+    <div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default">
+            <div class="panel-heading">查询条件</div>
+            <div class="panel-body">
+                <div class="form-group" style="margin-top:15px">
+                    <div class="col-sm-2">
+                        <input id="txt_keyword" type="text" class="form-control" placeholder="图标编码" style="width: 180px;">
+                    </div>
+                    <div class="col-sm-4" style="text-align:left;">
+                        <button type="button" style="margin-left:10px" id="btn_query" class="btn btn-primary">查询</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toolbar" class="btn-group">
+            <button id="btn_add" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["AddBtnPms"]">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+            </button>
+            <button id="btn_edit" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["EditBtnPms"]">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+            </button>
+            <button id="btn_delete" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DeleteBtnPms"]">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+            </button>
+            <button id="btn_export" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DownLoadBtnPms"]">
+                <span class="glyphicon glyphicon-export" aria-hidden="true"></span>导出
+            </button>
+            <form method="post" enctype="multipart/form-data" action="/Icon/Import">
+                <input name="formFile" type="file" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DownLoadBtnPms"]" />
+                <input type="submit" class="glyphicon glyphicon-export" aria-hidden="true" style="@ViewBag.BtnPermissionDic["DownLoadBtnPms"]" value="导入">
+            </form>
+
+        </div>
+        <table id="tb_Icons"></table>
+
+    </div>
+</div>
+
+
+<!--model-->
+<div id="IconModel" class="form-horizontal" style="display:none">
+
+    <div class="form-group" style="margin-top:10px">
+        <label class="col-sm-2 control-label">Icon编码</label>
+        <div class="col-sm-4">
+            <input v-model="iconNo" id="IconNo" @@keyup="show($event)" class="form-control" placeholder="请输入Icon编码" required="required" />
+            <span style="position: absolute; right: 10%; top: 7px;"><i id="writeIcon"></i></span>
+        </div>
+    </div>
+
+    <div class="errormsg">
+
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" id="IconSubmit" class="btn btn-group">确定</button>
+            <button type="button" id="IconClose" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+<link href="~/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript">
+
+    $(function () {
+        //必填项
+        var required = $('input[required]');
+        required.each(function (i, n) {
+            $(n).parent().prev('label').append('<span style="color:red">*</span>');
+        });
+
+        //1.初始化Table
+        var table = new TableInit();
+        table.Init();
+
+        //2.初始化button
+        var button = new ButtonInit();
+        button.Init();
+    });
+
+    //vue model
+    var vm = new Vue({
+        el: "#IconModel",
+        data: {
+            id: '',
+            iconNo: '',
+        },
+        methods: {
+            show: function (ev) {
+                $("#writeIcon").attr('class', this.iconNo);
+            }
+        }
+    })
+
+    // 验证model
+    function validate() {
+        var icon = trim(vm.iconNo);
+        if (icon == '' || typeof (icon) == 'undefined') {
+            var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写图标编码</label>';
+            $(".errormsg").html(html);
+            return false;
+        }
+        return true;
+    }
+
+    //bootstrap tabel 初始化
+    var TableInit = function () {
+        var objTabelInit = new Object();
+
+        objTabelInit.Init = function () {
+            $("#tb_Icons").bootstrapTable({
+                url: '/Icon/PageIndex',         //请求后台的URL（*）
+                dataType: "json",
+                method: 'get',                      //请求方式（*）
+                //toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: false,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParamsType: "",
+                queryParams: objTabelInit.queryParams,//传递参数（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize: 10,                       //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: false,                //是否启用点击选中行
+                height: 550,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                   //是否显示父子表
+
+                columns: [{
+                    checkbox: true
+                }, {
+                    field: 'Id',
+                    title: 'Id',
+                    visible: false
+                }, {
+                    field: 'Icon',
+                    title: '图标编码'
+                }, {
+                    field: 'Icon',
+                    title: '图标',
+                    formatter: IconFormatter
+                }, {
+                    field: 'Color',
+                    title: '颜色'
+                }, {
+                    field: 'UpdateTime',
+                    title: '创建时间',
+                    formatter: DateFormat
+                }]
+            });
+        };
+
+        //获得查询参数
+        objTabelInit.queryParams = function (params) {
+            var temp = {
+                //这里的键的名字和控制器的变量名必须一致
+                pagesize: params.pageSize,
+                pageindex: params.pageNumber - 1,
+                iconname: $("#txt_keyword").val(),
+            };
+            return temp;
+        };
+
+        //权限format
+        function IconFormatter(value, row, index) {
+            return ["<i class='" + value + "'> </i >"];
+        }
+
+        function DateFormat(value, row, index) {
+            if (value == "" || typeof (value)
+                == "undefined" || value == null)
+                return "";
+            return value.replace(/T/, ' ').substring(0, 18);
+        }
+
+        return objTabelInit;
+    }
+
+
+    //按钮事件初始化
+    var ButtonInit = function () {
+        var oInit = new Object();
+        // model
+
+        oInit.Init = function () {
+
+            var index = 0;
+            var flag = '';
+            //搜索
+            $("#btn_query").click(function () {
+                $("#tb_Icons").bootstrapTable('refresh');
+            });
+            //新增
+            $("#btn_add").click(function () {
+                //弹窗
+                operate.initvm();
+                index = addoredit('add');
+            });
+
+            //编辑
+            $("#btn_edit").click(function () {
+                var row = $("#tb_Icons").bootstrapTable('getSelections');
+                if (row.length != 1) {
+                    layer.msg('请选中一项进行编辑');
+                    return;
+                }
+                var iconId = row[0].Id;
+                operate.getIcon(iconId);
+                index = addoredit('edit');
+            });
+
+            //删除
+            $("#btn_delete").click(function () {
+                var row = $("#tb_Icons").bootstrapTable('getSelections');
+                if (row.length <= 0) {
+                    layer.msg('还未选中任何项');
+                    return;
+                }
+                layer.confirm('确定删除么？', {
+                    btn: ['确定', '取消']
+                }, function () {
+                    var ids = [];
+                    for (var i = 0; i < row.length; i++) {
+                        ids[i] = row[i].Id;
+                    }
+                    operate.delete(ids);
+                }, function () {
+                    return;
+                });
+            });
+            //保存
+            $("#IconSubmit").click(function () {
+                if (flag == 'add') {
+                    operate.add(index);
+                }
+                if (flag == 'edit') {
+                    operate.edit(index);
+                }
+            });
+            //取消 事件
+            $("#IconClose").click(function () {
+                layer.close(index);
+            })
+
+            //导出 事件
+            $("#btn_export").click(function () {
+                var data = { iconname: vm.iconNo }
+                $ses.postExportFile({
+                    url: '/Icon/Export',
+                    data: data,
+                    method: 'post'
+                });
+            })
+
+            //弹窗事件
+            function addoredit(fa) {
+                var index = layer.open({
+                    type: 1,
+                    title: '图标',
+                    skin: 'layui-layer-rim', //样式类名
+                    area: ['800px', '600px'], //宽高
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: $("#IconModel"),
+                });
+                flag = fa;
+                return index;
+            };
+        };
+
+        return oInit;
+    };
+
+
+    //按钮事件操作逻辑
+    var operate = {
+
+        add: function (index) {
+            if (!validate())
+                return;
+            $ses.post("/Icon/AddIcon", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(operate.refresh, 1000);//刷新页面
+            });
+        },
+
+        edit: function (index) {
+            if (!validate()) {
+                return;
+            }
+            $ses.post("/Icon/UpdateIcon", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(operate.refresh, 1000);//刷新页面
+            });
+        },
+
+        delete: function (ids) {
+            var data = {
+                ids: ids
+            }
+            $ses.post("/Icon/DeleteByIds", data, function (result) {
+                $ses.msg(result.Message);
+                setTimeout(operate.refresh, 1000);//刷新页面
+            });
+        },
+
+        getIcon: function (icon) {
+            var data = {
+                id: icon
+            };
+            $ses.get('/Icon/GetIconById', data, function (result) {
+                vm.iconNo = result.Icon;
+                vm.id = result.Id;
+                vm.show('');
+            });
+        },
+
+        initvm: function () {
+            vm.id = '';
+            vm.iconNo = '';
+        },
+
+        refresh: function () {
+            $("#tb_Icons").bootstrapTable('refresh');
+        },
+
+    }
+
+</script>

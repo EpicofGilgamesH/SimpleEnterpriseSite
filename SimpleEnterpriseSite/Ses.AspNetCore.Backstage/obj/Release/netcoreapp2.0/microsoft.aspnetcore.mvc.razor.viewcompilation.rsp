@@ -1,0 +1,17 @@
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage
+--output-path=obj\Release\netcoreapp2.0\
+--application-name=Ses.AspNetCore.Backstage
+--content-root=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Account\Login.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Department\Index.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Home\About.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Home\Contact.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Home\Index.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Module\Index.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Role\Index.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Shared\Components\Icon\default.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Shared\Components\Permission\default.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Shared\Error.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Shared\_Layout.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\Shared\_ValidationScriptsPartial.cshtml
+--file=F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.Backstage\Views\UserManage\Index.cshtml

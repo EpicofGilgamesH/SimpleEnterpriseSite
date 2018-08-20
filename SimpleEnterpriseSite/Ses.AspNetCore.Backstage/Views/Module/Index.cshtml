@@ -1,0 +1,688 @@
+﻿@{
+    ViewBag.Title = "UserManage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Ses.AspNetCore.Framework.Helper.Tree
+@using Ses.AspNetCore.Entities.System
+@using Ses.AspNetCore.Entities.Enum
+@model IEnumerable<SesTreeModel>
+
+
+@functions {
+    string GetLevelSpan(int level)
+    {
+        string span = "&nbsp;&nbsp;&nbsp;&nbsp;";
+        for (int i = 0; i < level; i++)
+        {
+            span += span;
+        }
+        return span;
+    }
+
+    string GetState(StateEnum state)
+    {
+        string nstate = string.Empty;
+        if (state == StateEnum.Normal)
+        {
+            nstate = "启用";
+        }
+        if (state == StateEnum.Locked)
+        {
+            nstate = "锁住";
+        }
+        if (state == StateEnum.Delete)
+        {
+            nstate = "禁用";
+        }
+        return nstate;
+    }
+}
+
+
+<div class="row">
+    <div class="col-sm-12 animated fadeInRight">
+        <div class="panel-body" style="padding-bottom:0px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">查询条件</div>
+                <div class="panel-body">
+                    <form asp-controller="Module" asp-action="Index" method="get">
+                        <div class="form-group" style="margin-top:15px">
+                            <div class="col-sm-2">
+                                <input id="keyword" name="keyword" value="@ViewBag.SearchKey" type="text" class="form-control" placeholder="请输入查询关键字" style="width: 180px;">
+                            </div>
+                            <div class="col-sm-4" style="text-align:left;">
+                                <button type="submit" style="margin-left:10px" id="btn_query" class="btn btn-primary">查询</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="toolbar" class="btn-group">
+                <button id="btn_add" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["AddBtnPms"]">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                </button>
+                <button id="btn_edit" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["EditBtnPms"]">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+                </button>
+                <button id="btn_delete" type="button" class="btn btn-default" style="@ViewBag.BtnPermissionDic["DeleteBtnPms"]">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+                </button>
+            </div>
+            <table id="tb_claims" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th><input id='allboxs' onclick='allcheck()' type='checkbox' /></th>
+                        <th>名称</th>
+                        <th>链接</th>
+                        <th>权限用户</th>
+                        <th>图标</th>
+                        <th>菜单</th>
+                        <th>状态</th>
+                        <th>排序</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        var entity = item.Data as SysClaim;
+                        var name = GetLevelSpan(item.Level) + entity.Name;
+                        var isMenu = entity.IsMenu == true ? "是" : "否";
+                        var stated = GetState(entity.State);
+                        var style = string.Empty;
+
+                        <tr data-level="@item.Level" data-isparent="@item.HasChildren">
+                            <td><input name='boxs' type='checkbox' value='@item.Id' /></td>
+                            <td>
+                                @if (item.HasChildren)
+                                {
+                                    <span><i class="fa fa-chevron-down" style="cursor: pointer" onclick="openOrCloseChild(this,'@item.Level');"></i></span>
+                                }
+                                else
+                                {
+                                    <span style="width:12px;height:12px;display:inline-block;"></span>
+                                }
+                                <span>@Html.Raw(name)</span>
+                            </td>
+                            <td>@entity.Url </td>
+                            <td>
+                                @if (!item.HasChildren)
+                                {
+                                    <button type="button" class="btn btn-info" onclick="PermissionUsers('@item.Id');">查看</button>
+                                    style = "top:7px;";
+                                }
+                            </td>
+                            <td><i class="@entity.Icon" style="position:relative;@style;"></i></td>
+                            <td>@isMenu</td>
+                            <td>@stated</td>
+                            <td>@entity.Sort</td>
+                            <td>@entity.Description</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--model-->
+<div id="ClaimModel" class="form-horizontal" style="display:none">
+
+    <div class="form-group" style="margin-top:5px;">
+        <label class="col-sm-2 control-label">名称</label>
+        <div class="col-sm-4">
+            <input v-model="name" id="Name" class="form-control" placeholder="请输入菜单名称" required="required" />
+        </div>
+
+        <label class="col-sm-2 control-label">上级</label>
+        <div class="col-sm-4">
+            <select v-model="parentId" style="width:240px;height:30px;">
+                <option v-for="option in parentoptions" v-bind:value="option.value">
+                    {{option.text}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">链接</label>
+        <div class="col-sm-4">
+            <input v-model="url" id="url" class="form-control" placeholder="请输入菜单链接" />
+        </div>
+
+        <label class="col-sm-2 control-label">图标</label>
+        <div class="col-sm-3">
+            <input id="encode" class="form-control" placeholder="请选择菜单图标" readonly="readonly" />
+            <span style="position:absolute;right:10%;top:7px;" id="encodeInfo"></span>
+        </div>
+        <div onclick="openIcon();" style="float:left;margin-top: 6px;cursor:pointer;">
+            <i class="fa fa-certificate"></i>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">排序</label>
+        <div class="col-sm-4">
+            <input v-model="sort" class="form-control" placeholder="请输入排序" type="number" />
+        </div>
+
+        <label class="col-sm-2 control-label">状态</label>
+        <div class="col-sm-4">
+            <select v-model="state" style="width:240px;height:30px;">
+                <option v-for="option in stateoptions" v-bind:value="option.value">
+                    {{option.text}}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">菜单</label>
+        <div class="col-sm-4">
+            <input name="checkbox" id="isMenu" type="checkbox" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">备注</label>
+        <div class="col-sm-8">
+            <input v-model="description" class="form-control" placeholder="备注" />
+        </div>
+    </div>
+
+    <div class="errormsg">
+
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="button" id="Rolebutton" class="btn btn-group">确定</button>
+            <button type="button" id="CloleRole" class="btn btn-group">取消</button>
+        </div>
+    </div>
+</div>
+
+
+<!--icon-->
+<div id="Icon" style="display:none;">
+    @await Component.InvokeAsync("Icon")
+</div>
+
+<!--页面对应权限的用户-->
+<div id="PermissionUsePage" style="display:none">
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-sm-offset-2" style="margin-top:20px;">
+                <label>增</label>
+                <input type="checkbox" name="btn" value="AddBtnPms" />
+                <label>改</label>
+                <input type="checkbox" name="btn" value="EditBtnPms" />
+                <label>删</label>
+                <input type="checkbox" name="btn" value="DeleteBtnPms" />
+                <label>上传</label>
+                <input type="checkbox" name="btn" value="UploadBtnPms" />
+                <label>导出</label>
+                <input type="checkbox" name="btn" value="DownLoadBtnPms" />
+                <input type="text" id="username" placeholder="用户Id或姓名" />
+                <button class="btn btn-info" id="searchuser" style="margin:20px;">查询</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1 .col-xs-6">
+                <table id="PermissionUserTable"></table>
+
+                <div class="col-sm-offset-5">
+                    <button type="button" id="btnpermission" class="btn btn-group">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="ClaimId" />
+</div>
+
+
+<link href="~/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript">
+    $(function () {
+        //必填项
+        var required = $('input[required]');
+        required.each(function (i, n) {
+            $(n).parent().prev('label').append('<span style="color:red">*</span>');
+        });
+
+        //初始化button
+        var button = new ButtonInit();
+        button.Init();
+
+        //初始化tabel
+        var table = new TableInit();
+        table.Init();
+    });
+
+    //vm
+    var vm = new Vue({
+        el: '#ClaimModel',
+        data: {
+            id: '',
+            name: '',
+            parentId: "00000000-0000-0000-0000-000000000000",
+            parentoptions: [],
+            url: '',
+            icon: '',
+            sort: '',
+            isMenu: 1,
+            state: 1,
+            stateoptions: [
+                { text: '启用', value: '1' },
+                { text: '禁用', value: '0' },
+                { text: '锁住', value: '2' }
+            ],
+            description: '',
+        },
+        methods: {
+            getparentoptions: function () {
+                var _this = this;
+                var aaa = getModuleOptions();
+                var def = {
+                    text: '根节点',
+                    value: '00000000-0000-0000-0000-000000000000'
+                }
+                aaa.unshift(def);
+                _this.parentoptions = aaa;
+            }
+        }
+    });
+    vm.getparentoptions();
+
+
+    // 验证
+    function validate() {
+        var name = trim(vm.name);
+        if (name == '' || typeof (name) == 'undefined') {
+            var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写角色名</label>';
+            $(".errormsg").html(html);
+            return false;
+        }
+        var parent = trim(vm.parentId);
+        if (parent == '' || typeof (parent) == 'undefined') {
+            var html = '<label class="col-sm-4" style="color:red;margin-left:60px;">请填写角色信息</label>';
+            $(".errormsg").html(html);
+            return false;
+        }
+        return true;
+    }
+
+    // table 全选事件
+    function allcheck() {
+        var nn = $("#allboxs").is(":checked"); //判断th中的checkbox是否被选中，如果被选中则nn为true，反之为false
+        if (nn == true) {
+            var namebox = $("input[name^='boxs']");  //获取name值为boxs的所有input
+            for (i = 0; i < namebox.length; i++) {
+                namebox[i].checked = true;    //js操作选中checkbox
+            }
+        }
+        if (nn == false) {
+            var namebox = $("input[name^='boxs']");
+            for (i = 0; i < namebox.length; i++) {
+                namebox[i].checked = false;
+            }
+        }
+    }
+
+    //获取角色列表
+    function getModuleOptions() {
+        //$ses.get('/Role/GetRoleItems', null, function (result) {
+        //    return result;
+        //});
+        var data = [];
+        $.ajax({
+            async: false,
+            type: 'get',
+            dataType: 'json',
+            url: '/Module/GetClaimOptions',
+            data:
+            {
+            },
+            success: function (result) {
+                data = result;
+            },
+            error: function (err) {
+                $ses.msg(err.statusText);
+            }
+        });
+        return data;
+    }
+
+    //列表缩放事件
+    function openOrCloseChild(obj, level) {
+        // 获取点击的父项下的所有层级的子项,即或取直到level跟其一致的项
+        var ptr = $(obj).parent().parent().parent();
+        while (true) {
+            var ptrn = $(ptr).next('tr');
+            var leveln = $(ptrn).attr('data-level');
+            if (leveln == typeof ("undefined") || leveln == null) {
+                break;
+            }
+            if (leveln != level) {
+                $(ptrn).toggle();
+                ptr = ptrn;
+            } else {
+                break;
+            }
+        }
+
+        if ($(obj).attr('class') == 'fa fa-chevron-right') {
+            $(obj).attr('class', 'fa fa-chevron-down');
+        } else {
+            $(obj).attr('class', 'fa fa-chevron-right');
+        }
+    }
+
+    //图标点击事件
+    var iconindex = '';
+    function openIcon() {
+        iconindex = layer.open({
+            type: 1,
+            title: '菜单',
+            skin: 'layui-layer-rim', //样式类名
+            area: ['600px', '600px'], //宽高
+            closeBtn: 1, //不显示关闭按钮
+            anim: 2,
+            shadeClose: true, //开启遮罩关闭
+            content: $("#Icon"),
+        });
+    }
+
+    //按钮操作
+    var ButtonInit = function () {
+        var oInit = new Object();
+        // model
+
+        oInit.Init = function () {
+
+            var index = 0;
+
+            //新增
+            $("#btn_add").click(function () {
+                //$("#RoleId").removeAttr('readOnly');
+                //弹窗
+                operate.initvm();
+                index = addoredit('add');
+            });
+
+            //编辑
+            $("#btn_edit").click(function () {
+                //获取选中项
+                var arr = new Array();
+                $("input[name^='boxs']:checked").each(function (index, element) {
+                    arr[index] = $(element).val();
+                });
+                if (arr.length != 1) {
+                    layer.msg('请至少选中一项');
+                    return;
+                }
+                var claimId = arr[0];
+                operate.getClaimInfo(claimId); //获取菜单信息
+                index = addoredit('edit');
+            });
+
+            //删除
+            $("#btn_delete").click(function () {
+                var arr = new Array();
+                $("input[name^='boxs']:checked").each(function (index, element) {
+                    arr[index] = $(element).val();
+                });
+                if (arr.length <= 0) {
+                    layer.msg('请选中一项进行编辑');
+                    return;
+                }
+                layer.confirm('确定删除么？', {
+                    btn: ['确定', '取消']
+                }, function () {
+                    var ids = [];
+                    for (var i = 0; i < arr.length; i++) {
+                        ids[i] = arr[i];
+                    }
+                    operate.delete(ids);
+                }, function () {
+                    return;
+                });
+            });
+            //保存
+            $("#Rolebutton").click(function () {
+                if (layeroperate == 'add') {
+                    operate.add(index);
+                }
+                if (layeroperate == 'edit') {
+                    operate.edit(index);
+                }
+            });
+            //取消 事件
+            $("#CloleRole").click(function () {
+                layer.close(index);
+            })
+
+            var layeroperate = '';
+            //弹窗事件
+            function addoredit(flag) {
+                var index = layer.open({
+                    type: 1,
+                    title: '菜单',
+                    skin: 'layui-layer-rim', //样式类名
+                    area: ['800px', '600px'], //宽高
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: $("#ClaimModel"),
+                });
+                layeroperate = flag;
+                return index;
+            };
+        };
+
+        return oInit;
+    };
+
+
+
+    //函数集合
+    var operate = {
+
+        add: function (index) {
+            if (!validate())
+                return;
+            vm.icon = $("#encode").val();
+            vm.isMenu = $("#isMenu").is(":checked");
+            $ses.post("/Module/AddClaim", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        edit: function (index) {
+            if (!validate()) {
+                return;
+            }
+            vm.icon = $("#encode").val();
+            vm.isMenu = $("#isMenu").is(":checked");
+            $ses.post("/Module/EditClaim", vm._data, function (result) {
+                $ses.msg(result.Message);
+                layer.close(index);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        delete: function (ids) {
+            var data = {
+                ids: ids
+            }
+            $ses.post("/Module/DeleteClaims", data, function (result) {
+                $ses.msg(result.Message);
+                setTimeout(refresh, 1000);//刷新页面
+            });
+        },
+
+        //保持ajax的异步请求
+        getClaimInfo: function (claimId) {
+            var data = { id: claimId };
+            $ses.get('/Module/GetClaimById', data, function (result) {
+                vm.id = result.Id;
+                vm.name = result.Name;
+                vm.url = result.Url;
+                vm.parentId = result.ParentId;
+                //vm.icon = result.Icon
+                $("#encode").val(result.Icon);
+                $("#encodeInfo").html("<i class='" + result.Icon + "'></i>");
+                vm.sort = result.Sort;
+                vm.state = result.State;
+                //vm.isMenu = result.IsMenu;
+                $("#isMenu").attr("checked", result.IsMenu);
+                vm.description = result.Description;
+            });
+        },
+
+        //getClaimInfo: function (claimId) {
+        //    $.ajax({
+        //        async: false,
+        //        type: 'get',
+        //        dataType: 'json',
+        //        url: '/Module/GetClaimById',
+        //        data:
+        //        {
+        //            id: claimId
+        //        },
+        //        success: function (result) {
+        //            vm.id = result.Id;
+        //            vm.name = result.Name;
+        //            vm.url = result.Url;
+        //            vm.parentId = result.ParentId;
+        //            //vm.icon = result.Icon
+        //            $("#encode").val(result.Icon);
+        //            $("#encodeInfo").html("<i class='" + result.Icon + "'></i>");
+        //            vm.sort = result.Sort;
+        //            vm.state = result.State;
+        //            //vm.isMenu = result.IsMenu;
+        //            $("#isMenu").attr("checked", result.IsMenu);
+        //            vm.description = result.Description;
+        //        },
+        //        error: function (err) {
+        //            $ses.msg(err.statusText);
+        //        }
+        //    });
+        //},
+
+        initvm: function () {
+            vm.id = '';
+            vm.name = "";
+            vm.url = "";
+            vm.parentId = "00000000-0000-0000-0000-000000000000";
+            vm.icon = "";
+            vm.sort = '';
+            vm.isMenu = 1;
+            vm.state = 1;
+            vm.description = '';
+        }
+    }
+
+
+    //图标选择
+    function selectIcon(obj) {
+        var icon = $(obj).find('i').attr('id');
+        $("#encode").val(icon);
+        $("#encodeInfo").html("<i class='" + icon + "'></i>");
+        vm.encode = icon;
+        layer.close(iconindex);
+    }
+
+    function refresh() {
+        window.location.reload();
+    }
+
+
+    var TableInit = function () {
+        var objTabelInit = new Object();
+        objTabelInit.Init = function () {
+            $("#PermissionUserTable").bootstrapTable({
+                url: '/Permission/PermissionUsers',         //请求后台的URL（*）
+                dataType: "json",
+                method: 'get',                      //请求方式（*）
+                //toolbar: '#toolbar',                //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: false,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                queryParams: objTabelInit.queryParams,//传递参数（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                       //初始化加载第一页，默认第一页
+                pageSize: 10,                       //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: false,                //是否启用点击选中行
+                height: 500,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                   //是否显示父子表
+
+                columns: [{
+                    field: 'UserId',
+                    title: '用户名',
+                }, {
+                    field: 'RealName',
+                    title: '姓名',
+                }]
+            });
+        };
+
+        //获得查询参数
+        objTabelInit.queryParams = function (params) {
+            var temp = {
+                //这里的键的名字和控制器的变量名必须一致
+                pagesize: params.limit, //页面大小
+                pageindex: params.offset,  //页码
+                claimId: $("#ClaimId").val(),
+                //btn: $("input[name='btn']:checked").val(),
+                btn: getbtn(),
+                username: $("#username").val()
+            };
+            return temp;
+        };
+
+        function getbtn() {
+            var btnstr = "";
+            $("input[name='btn']:checked").each(function (index, element) {
+                btnstr += $(element).val() + ",";
+            })
+            return btnstr;
+        }
+
+        return objTabelInit;
+    }
+
+    //弹窗事件
+    var layerindex;
+    //查看拥有页面权限的人员
+    function PermissionUsers(claimId) {
+        //显示弹窗，渲染table
+        $("#ClaimId").val(claimId);
+        $("#PermissionUserTable").bootstrapTable('refresh');
+        layerindex = $ses.layerWindow("权限用户", $("#PermissionUsePage"));
+    }
+
+    //关闭权限用户弹窗
+    $("#btnpermission").click(function () {
+        layer.close(layerindex);
+    })
+
+    $("#searchuser").click(function () {
+        $("#PermissionUserTable").bootstrapTable('refresh');
+    })
+</script>

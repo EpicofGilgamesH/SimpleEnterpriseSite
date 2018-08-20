@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/css/framework-login.css" rel="stylesheet" />
+    <script src="~/lib/jquery/jquery-2.1.1.min.js"></script>
+    <script src="~/lib/cookie/jquery.cookie.js"></script>
+    <script src="~/lib/md5/jquery.md5.js"></script>
+    <script src="~/lib/verification/verification.js"></script>
+    <script src="~/js/ses.js"></script>
+    <!--[if lte IE 8]>
+        <div id="errorie"><div>您还在使用老掉牙的IE，正常使用系统前请升级您的浏览器到 IE8以上版本 <a target="_blank" href="http://windows.microsoft.com/zh-cn/internet-explorer/ie-8-worldwide-languages">点击升级</a>&nbsp;&nbsp;强烈建议您更改换浏览器：<a href="http://down.tech.sina.com.cn/content/40975.html" target="_blank">谷歌 Chrome</a></div></div>
+    <![endif]-->
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="logo">
+                <i class="fa fa-modx"></i>
+                <h1><span>ZLizzy</span>后台管理</h1>
+            </div>
+            <form class="form">
+                <div class="row">
+                    <input id="txt_account" type="text" placeholder="用户名/手机号/邮箱">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div class="row">
+                    <input id="txt_password" type="password" placeholder="登录密码">
+                    <i class="fa fa-key"></i>
+                </div>
+                <div class="row">
+                    <input id="txt_code" maxlength="4" type="text" placeholder="验证码" style="width: 150px; float: left;" />
+                    <span>
+                        <i id="CodeRight" class="fa fa-check-square" style="color:green;left:120px;top:14px;display:none;"></i>
+                        <i id="CodeError" class="fa fa-exclamation-triangle" style="color:orangered;left:120px;top:14px;display:none;"></i>
+                    </span>
+                    <div style="width: 150px; float: right; padding-top: 1px; padding-left: 14px;">
+                        <div id="v_container" style="width: 138px;height: 40px;display:inline-block;"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <button id="login_button" type="button"><span>登录</span></button>
+                </div>
+                <div class="row">
+                </div>
+            </form>
+            <div class="login_tips"></div>
+        </div>
+        <ul class="bg-bubbles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <div class="copyright">
+        <a href="http://www.nfine.cn" style="text-decoration:none;color:#fff;">NFine开发团队出品</a>
+        <br>
+        适用浏览器：IE8以上、360、FireFox、Chrome、Safari、Opera、傲游、搜狗、世界之窗.
+    </div>
+
+    <script type="text/javascript">
+        (function ($) {
+            $.login = {
+                isValidate: false,
+                formMessage: function (msg) {
+                    $('.login_tips').find('.tips_msg').remove();
+                    $('.login_tips').append('<div class="tips_msg"><i class="fa fa-question-circle"></i>' + msg + '</div>');
+                },
+                loginClick: function () {
+                    //验证验证码
+                    var $username = $("#txt_account");
+                    var $password = $("#txt_password");
+                    var $code = $("#txt_code");
+                    if ($code.val() == "") {
+                        $code.focus();
+                        $.login.formMessage('请输入验证码。');
+                        return false;
+                    }
+                    if (!$.login.isValidate) {
+                        $code.focus();
+                        $.login.formMessage('验证码错误。');
+                        return false;
+                    }
+                    if ($username.val() == "") {
+                        $username.focus();
+                        $.login.formMessage('请输入用户名/手机号/邮箱。');
+                        return false;
+                    }
+                    if ($password.val() == "") {
+                        $password.focus();
+                        $.login.formMessage('请输入登录密码。');
+                        return false;
+                    }
+                    $("#login_button").attr('disabled', 'disabled').find('span').html("loading...");
+                    var returnUrl = '@ViewBag.ReturnUrl';
+                    var params = { userName: $.trim($username.val()), password: $.md5($.trim($password.val())), returnUrl: returnUrl };
+                    $.ajax({
+                        url: "/Account/Login",
+                        data: params,
+                        type: "post",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.Status == ResultStatus.OK) {
+                                $("#login_button").find('span').html("登录成功，正在跳转...");
+                                window.setTimeout(function () {
+                                    window.location.href = "/Home/Index";
+                                }, 500);
+                            } else {
+                                $("#login_button").removeAttr('disabled').find('span').html("登录");
+                                //$("#switchCode").trigger("click");
+                                //$code.val('');
+                                $.login.formMessage(data.Message);
+                            }
+                        }
+                    });
+                },
+                init: function () {
+                    var verifyCode = new GVerify("v_container");
+                    $('.wrapper').height($(window).height());
+                    $(".container").css("margin-top", ($(window).height() - $(".container").height()) / 2 - 50);
+                    $(window).resize(function (e) {
+                        $('.wrapper').height($(window).height());
+                        $(".container").css("margin-top", ($(window).height() - $(".container").height()) / 2 - 50);
+                    });
+                    //$("#switchCode").click(function () {
+                    //    $("#imgcode").attr("src", "/Login/GetAuthCode?time=" + Math.random());
+                    //});
+                    var login_error = top.$.cookie('zlizzy_login_error');
+                    if (login_error != null) {
+                        switch (login_error) {
+                            case "overdue":
+                                $.login.formMessage("系统登录已超时,请重新登录");
+                                break;
+                            case "OnLine":
+                                $.login.formMessage("您的帐号已在其它地方登录,请重新登录");
+                                break;
+                            case "-1":
+                                $.login.formMessage("系统未知错误,请重新登录");
+                                break;
+                        }
+                        top.$.cookie('zlizzy_login_error', '', { path: "/", expires: -1 });
+                    }
+
+
+                    //验证码验证
+                    $("#txt_code").keyup(function () {
+                        var code = $(this).val();
+                        if (verifyCode.validate(code)) {
+                            $.login.isValidate = true;
+                            $("#CodeRight").show();
+                            $("#CodeError").hide();
+                        } else {
+                            $.login.isValidate = false;
+                            $("#CodeError").show();
+                            $("#CodeRight").hide();
+                        }
+                    });
+
+                    //点击登陆事件
+                    $("#login_button").click(function () {
+                        $.login.loginClick();
+                    });
+                    document.onkeydown = function (e) {
+                        if (!e) e = window.event;
+                        if ((e.keyCode || e.which) == 13) {
+                            document.getElementById("login_button").focus();
+                            document.getElementById("login_button").click();
+                        }
+                    }
+                }
+            };
+            $(function () {
+                $.login.init();
+            });
+        })(jQuery);
+    </script>
+</body>
+</html>
+

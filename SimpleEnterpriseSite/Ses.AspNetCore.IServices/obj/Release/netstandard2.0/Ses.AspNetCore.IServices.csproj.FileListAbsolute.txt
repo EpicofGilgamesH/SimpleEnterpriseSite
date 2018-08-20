@@ -1,0 +1,15 @@
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.IServices.deps.json
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.IServices.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.IServices.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.Entities.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.Framework.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.ViewModels.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.Framework.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.Entities.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\bin\Release\netstandard2.0\Ses.AspNetCore.ViewModels.pdb
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.csprojResolveAssemblyReference.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.csproj.CoreCompileInputs.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.AssemblyInfoInputs.cache
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.AssemblyInfo.cs
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.dll
+F:\学习笔记\SimpleEnterpriseSite\Ses.AspNetCore.IServices\obj\Release\netstandard2.0\Ses.AspNetCore.IServices.pdb

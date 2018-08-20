@@ -1,0 +1,28 @@
+﻿@using Ses.AspNetCore.Entities.System
+@model IEnumerable<SysIcon>
+
+<style>
+    .sesinco li {
+        padding: 10px;
+        float: left;
+        list-style: none;
+        cursor: pointer;
+    }
+
+        .sesinco li:hover {
+            background-color: cadetblue;
+            transform: scale(1.4);
+        }
+</style>
+
+<ul class="sesinco">
+    @foreach (var item in Model)
+    {
+        @*<li class="@item.Icon" id="@item.Icon"></li>*@
+        <li onclick="selectIcon(this);">
+            <i class="@item.Icon" id="@item.Icon"></i>
+        </li>
+    }
+</ul>
+
+

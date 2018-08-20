@@ -1,0 +1,66 @@
+﻿@model string
+
+<!--权限弹窗-->
+<div id="Permission" style="display:none">
+    <div class="col-sm-6" style="border-right:2px solid gray">
+        <div class="col-sm-offset-3" style="margin-top:20px;">
+            <ul id="treePermission" class="ztree"></ul>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/zTree_v3/js/jquery.ztree.core.js"></script>
+<script src="~/lib/zTree_v3/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript">
+    var setting = {
+        check: {
+            enable: true
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        }
+    };
+
+    var zNodes = [];
+
+    //var zNodes = [
+    //    { id: 1, pId: 0, name: "随意勾选 1", open: true },
+    //    { id: 11, pId: 1, name: "随意勾选 1-1", open: true },
+    //    { id: 111, pId: 11, name: "随意勾选 1-1-1" },
+    //    { id: 112, pId: 11, name: "随意勾选 1-1-2" },
+    //    { id: 12, pId: 1, name: "随意勾选 1-2", open: true },
+    //    { id: 121, pId: 12, name: "随意勾选 1-2-1" },
+    //    { id: 122, pId: 12, name: "随意勾选 1-2-2" },
+    //    { id: 2, pId: 0, name: "随意勾选 2", checked: true, open: true },
+    //    { id: 21, pId: 2, name: "随意勾选 2-1" },
+    //    { id: 22, pId: 2, name: "随意勾选 2-2", open: true },
+    //    { id: 221, pId: 22, name: "随意勾选 2-2-1", checked: true },
+    //    { id: 222, pId: 22, name: "随意勾选 2-2-2" },
+    //    { id: 23, pId: 2, name: "随意勾选 2-3" }
+    //];
+
+    var code;
+
+    function setCheck() {
+        var zTree = $.fn.zTree.getZTreeObj("treePermission"),
+            type = { "Y": "ps", "N": "ps" };
+        zTree.setting.check.chkboxType = type;
+    }
+
+    $(document).ready(function () {
+
+        $.fn.zTree.init($("#treePermission"), setting, zNodes);
+        setCheck();
+    });
+
+    function getzNodes() {
+        var data = {
+            id: ,
+        }
+        $ses.get("/Permission/PermissionTreeJson", )
+
+    }
+
+</script>
